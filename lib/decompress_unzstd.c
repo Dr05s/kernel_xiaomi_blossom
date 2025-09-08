@@ -66,13 +66,9 @@
  * from xxhash and zstd from being exported by the EXPORT_SYMBOL macro.
  */
 #ifdef STATIC
-# define UNZSTD_PREBOOT
-# include "xxhash.c"
-# include "zstd/entropy_common.c"
-# include "zstd/fse_decompress.c"
-# include "zstd/huf_decompress.c"
-# include "zstd/zstd_common.c"
-# include "zstd/decompress.c"
+#define UNZSTD_PREBOOT
+#include "xxhash.c"
+#include "zstd/decompress_sources.h"
 #endif
 
 #include <linux/decompress/mm.h>
