@@ -34,14 +34,14 @@ struct zstd_ctx {
 
 static zstd_parameters zstd_params(void)
 {
-	return zstd_get_params(ZSTD_DEF_LEVEL, 0, 0);
+	return zstd_get_params(ZSTD_DEF_LEVEL, PAGE_SIZE);
 }
 
 static int zstd_comp_init(struct zstd_ctx *ctx)
 {
 	int ret = 0;
 	const zstd_parameters params = zstd_params();
-	const size_t wksp_size = zstd_cctx_workspace_bound(params.cParams);
+	const size_t wksp_size = zstd_cctx_workspace_bound(&params.cParams);
 
 	ctx->cwksp = vzalloc(wksp_size);
 	if (!ctx->cwksp) {
@@ -162,7 +162,7 @@ static int __zstd_compress(const u8 *src, unsigned int slen,
 	struct zstd_ctx *zctx = ctx;
 	const zstd_parameters params = zstd_params();
 
-	out_len = zstd_compress_cctx(zctx->cctx, dst, *dlen, src, slen, params);
+	out_len = zstd_compress_cctx(zctx->cctx, dst, *dlen, src, slen, &params);
 	if (zstd_is_error(out_len))
 		return -EINVAL;
 	*dlen = out_len;
