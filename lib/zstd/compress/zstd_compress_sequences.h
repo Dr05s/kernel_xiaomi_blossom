@@ -42,7 +42,7 @@ size_t ZSTD_encodeSequences(
             FSE_CTable const* CTable_MatchLength, BYTE const* mlCodeTable,
             FSE_CTable const* CTable_OffsetBits, BYTE const* ofCodeTable,
             FSE_CTable const* CTable_LitLength, BYTE const* llCodeTable,
-            seqDef const* sequences, size_t nbSeq, int longOffsets, int bmi2);
+            SeqDef const* sequences, size_t nbSeq, int longOffsets, int bmi2);
 
 size_t ZSTD_fseBitCost(
     FSE_CTable const* ctable,
