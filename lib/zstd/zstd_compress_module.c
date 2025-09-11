@@ -13,6 +13,7 @@
 #include <linux/module.h>
 #include <linux/string.h>
 #include <linux/zstd.h>
+#include <linux/zstd_lib.h>
 
 #include "common/zstd_deps.h"
 #include "common/zstd_internal.h"
@@ -159,7 +160,7 @@ zstd_cctx *zstd_init_cctx(void *workspace, size_t workspace_size)
 }
 EXPORT_SYMBOL(zstd_init_cctx);
 
-zstd_cctx *zstd_create_cctx_advanced(zstd_custom_mem custom_mem)
+zstd_cctx *zstd_create_cctx_advanced(ZSTD_customMem custom_mem)
 {
 	return ZSTD_createCCtx_advanced(custom_mem);
 }
@@ -171,16 +172,16 @@ size_t zstd_free_cctx(zstd_cctx *cctx)
 }
 EXPORT_SYMBOL(zstd_free_cctx);
 
-zstd_cdict *zstd_create_cdict_byreference(const void *dict, size_t dict_size,
+ZSTD_CDict *zstd_create_cdict_byreference(const void *dict, size_t dict_size,
 					  zstd_compression_parameters cparams,
-					  zstd_custom_mem custom_mem)
+					  ZSTD_customMem custom_mem)
 {
 	return ZSTD_createCDict_advanced(dict, dict_size, ZSTD_dlm_byRef,
 					 ZSTD_dct_auto, cparams, custom_mem);
 }
 EXPORT_SYMBOL(zstd_create_cdict_byreference);
 
-size_t zstd_free_cdict(zstd_cdict *cdict)
+size_t zstd_free_cdict(ZSTD_CDict *cdict)
 {
 	return ZSTD_freeCDict(cdict);
 }
@@ -265,14 +266,14 @@ EXPORT_SYMBOL(zstd_end_stream);
 void zstd_register_sequence_producer(
   zstd_cctx *cctx,
   void* sequence_producer_state,
-  zstd_sequence_producer_f sequence_producer
+  ZSTD_sequenceProducer_F sequence_producer
 ) {
 	ZSTD_registerSequenceProducer(cctx, sequence_producer_state, sequence_producer);
 }
 EXPORT_SYMBOL(zstd_register_sequence_producer);
 
 size_t zstd_compress_sequences_and_literals(zstd_cctx *cctx, void* dst, size_t dst_capacity,
-					    const zstd_sequence *in_seqs, size_t in_seqs_size,
+					    const ZSTD_Sequence *in_seqs, size_t in_seqs_size,
 					    const void* literals, size_t lit_size, size_t lit_capacity,
 					    size_t decompressed_size)
 {
