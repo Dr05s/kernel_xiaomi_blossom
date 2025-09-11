@@ -26,14 +26,14 @@ zstd_compress-y := \
 		compress/zstd_lazy.o \
 		compress/zstd_ldm.o \
 		compress/zstd_opt.o \
-		compress/zstd_preSplit.o \
+		compress/zstd_preSplit.o
 
 zstd_decompress-y := \
 		zstd_decompress_module.o \
 		decompress/huf_decompress.o \
 		decompress/zstd_ddict.o \
 		decompress/zstd_decompress.o \
-		decompress/zstd_decompress_block.o \
+		decompress/zstd_decompress_block.o
 
 zstd_common-y := \
 		zstd_common_module.o \
@@ -41,4 +41,4 @@ zstd_common-y := \
 		common/entropy_common.o \
 		common/error_private.o \
 		common/fse_decompress.o \
-		common/zstd_common.o \
+		common/zstd_common.o
