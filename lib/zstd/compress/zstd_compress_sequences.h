@@ -1,5 +1,6 @@
+/* SPDX-License-Identifier: GPL-2.0+ OR BSD-3-Clause */
 /*
- * Copyright (c) Yann Collet, Facebook, Inc.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  * All rights reserved.
  *
  * This source code is licensed under both the BSD-style license (found in the
@@ -11,13 +12,14 @@
 #ifndef ZSTD_COMPRESS_SEQUENCES_H
 #define ZSTD_COMPRESS_SEQUENCES_H
 
+#include "zstd_compress_internal.h" /* SeqDef */
 #include "../common/fse.h" /* FSE_repeat, FSE_CTable */
 #include "../common/zstd_internal.h" /* SymbolEncodingType_e, ZSTD_strategy */
 
 typedef enum {
     ZSTD_defaultDisallowed = 0,
     ZSTD_defaultAllowed = 1
-} ZSTD_defaultPolicy_e;
+} ZSTD_DefaultPolicy_e;
 
 SymbolEncodingType_e
 ZSTD_selectEncodingType(
@@ -25,7 +27,7 @@ ZSTD_selectEncodingType(
         size_t const mostFrequent, size_t nbSeq, unsigned const FSELog,
         FSE_CTable const* prevCTable,
         short const* defaultNorm, U32 defaultNormLog,
-        ZSTD_defaultPolicy_e const isDefaultAllowed,
+        ZSTD_DefaultPolicy_e const isDefaultAllowed,
         ZSTD_strategy const strategy);
 
 size_t
