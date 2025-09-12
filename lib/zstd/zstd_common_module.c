@@ -11,6 +11,7 @@
 
 #include <linux/module.h>
 
+#include "common/allocations.h"
 #include "common/huf.h"
 #include "common/fse.h"
 #include "common/zstd_internal.h"
