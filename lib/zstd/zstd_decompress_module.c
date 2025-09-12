@@ -13,6 +13,7 @@
 #include <linux/module.h>
 #include <linux/string.h>
 #include <linux/zstd.h>
+#include <linux/zstd_lib.h>
 
 #include "common/zstd_deps.h"
 
@@ -56,7 +57,7 @@ size_t zstd_free_dctx(zstd_dctx *dctx)
 }
 EXPORT_SYMBOL(zstd_free_dctx);
 
-zstd_ddict *zstd_create_ddict_byreference(const void *dict, size_t dict_size,
+ZSTD_DDict *zstd_create_ddict_byreference(const void *dict, size_t dict_size,
 					  zstd_custom_mem custom_mem)
 {
 	return ZSTD_createDDict_advanced(dict, dict_size, ZSTD_dlm_byRef,
@@ -65,7 +66,7 @@ zstd_ddict *zstd_create_ddict_byreference(const void *dict, size_t dict_size,
 }
 EXPORT_SYMBOL(zstd_create_ddict_byreference);
 
-size_t zstd_free_ddict(zstd_ddict *ddict)
+size_t zstd_free_ddict(ZSTD_DDict *ddict)
 {
 	return ZSTD_freeDDict(ddict);
 }
@@ -88,7 +89,7 @@ EXPORT_SYMBOL(zstd_decompress_dctx);
 
 size_t zstd_decompress_using_ddict(zstd_dctx *dctx,
 	void *dst, size_t dst_capacity, const void* src, size_t src_size,
-	const zstd_ddict* ddict)
+	const ZSTD_DDict* ddict)
 {
 	return ZSTD_decompress_usingDDict(dctx, dst, dst_capacity, src,
 					  src_size, ddict);
