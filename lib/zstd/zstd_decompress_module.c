@@ -45,7 +45,7 @@ size_t zstd_dctx_workspace_bound(void)
 }
 EXPORT_SYMBOL(zstd_dctx_workspace_bound);
 
-zstd_dctx *zstd_create_dctx_advanced(zstd_custom_mem custom_mem)
+zstd_dctx *zstd_create_dctx_advanced(ZSTD_customMem custom_mem)
 {
 	return ZSTD_createDCtx_advanced(custom_mem);
 }
@@ -58,7 +58,7 @@ size_t zstd_free_dctx(zstd_dctx *dctx)
 EXPORT_SYMBOL(zstd_free_dctx);
 
 ZSTD_DDict *zstd_create_ddict_byreference(const void *dict, size_t dict_size,
-					  zstd_custom_mem custom_mem)
+					  ZSTD_customMem custom_mem)
 {
 	return ZSTD_createDDict_advanced(dict, dict_size, ZSTD_dlm_byRef,
 					 ZSTD_dct_auto, custom_mem);
