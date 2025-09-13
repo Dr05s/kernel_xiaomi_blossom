@@ -588,9 +588,9 @@
         sgm,sgm41513,usb-vlim = <4600>;
         sgm,sgm41513,usb-ilim = <2000>;
         sgm,sgm41513,usb-vreg = <0x1130>;
-        sgm,sgm41513,usb-ichg = <1500>;
+        sgm,sgm41513,usb-ichg = <1900>;
         sgm,sgm41513,precharge-current = <256>;
-        sgm,sgm41513,termination-current = <200>;
+        sgm,sgm41513,termination-current = <100>;
         sgm,sgm41513,boost-voltage = <5150>;
         sgm,sgm41513,boost-current = <1200>;
         sgm,sgm41513,enable_term;
@@ -603,10 +603,10 @@
         reg = <0x6B>;
         ti,bq2560x,usb-vlim = <4600>;
         ti,bq2560x,usb-ilim = <2000>;
-        ti,bq2560x,usb-vreg = <4350>;
-        ti,bq2560x,usb-ichg = <1500>;
+        ti,bq2560x,usb-vreg = <4450>;
+        ti,bq2560x,usb-ichg = <1900>;
         ti,bq2560x,precharge-current = <256>;
-        ti,bq2560x,termination-current = <200>;
+        ti,bq2560x,termination-current = <100>;
         ti,bq2560x,boost-voltage = <5150>;
         ti,bq2560x,boost-current = <1200>;
         ti,bq2560x,enable_term;
@@ -615,10 +615,10 @@
 
         cx,cx7601,usb-vlim = <4600>;
         cx,cx7601,usb-ilim = <2000>;
-        cx,cx7601,usb-vreg = <4350>;
-        cx,cx7601,usb-ichg = <1500>;
+        cx,cx7601,usb-vreg = <4450>;
+        cx,cx7601,usb-ichg = <1900>;
         cx,cx7601,precharge-current = <256>;
-        cx,cx7601,termination-current = <200>;
+        cx,cx7601,termination-current = <100>;
         cx,cx7601,boost-voltage = <5150>;
         cx,cx7601,boost-current = <1200>;
         cx,cx7601,enable_term;
@@ -627,10 +627,10 @@
 
         eta,eta6963,usb-vlim = <4600>;
         eta,eta6963,usb-ilim = <2000>;
-        eta,eta6963,usb-vreg = <4350>;
-        eta,eta6963,usb-ichg = <1500>;
+        eta,eta6963,usb-vreg = <4450>;
+        eta,eta6963,usb-ichg = <1900>;
         eta,eta6963,precharge-current = <256>;
-        eta,eta6963,termination-current = <200>;
+        eta,eta6963,termination-current = <100>;
         eta,eta6963,boost-voltage = <5150>;
         eta,eta6963,boost-current = <1200>;
         eta,eta6963,enable_term;
