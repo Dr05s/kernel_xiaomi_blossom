@@ -1,4 +1,3 @@
-#include <linux/sched/topology.h>
 #ifdef CONFIG_SMP
 #include "sched-pelt.h"
 
@@ -81,6 +80,7 @@ static inline void cfs_se_util_change(struct sched_avg *avg)
  * clock pelt      | 1| 2|    3|    4| 7| 8| 9|   10|   11|14|15|16
  *
  */
+#include <linux/sched/topology.h>
 static inline void update_rq_clock_pelt(struct rq *rq, s64 delta)
 {
 	if (unlikely(is_idle_task(rq->curr))) {
