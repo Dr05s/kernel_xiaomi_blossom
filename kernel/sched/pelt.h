@@ -1,3 +1,4 @@
+#include <linux/sched/topology.h>
 #ifdef CONFIG_SMP
 #include "sched-pelt.h"
 
