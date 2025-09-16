@@ -5295,7 +5295,7 @@ static int sched_idle_rq(struct rq *rq)
 
 static int sched_idle_cpu(int cpu)
 {
-  return sched_idle_rq(cpu_rq(cpu))
+  return sched_idle_rq(cpu_rq(cpu));
 }
 
 /*
@@ -11802,7 +11802,7 @@ static inline void *select_task_rq_fair_dummy(void)
 	return (void *)select_task_rq_fair;
 }
 #define select_task_rq_fair cass_select_task_rq_fair
-#endif /* CONFIG_SCHED_CASS
+#endif /* CONFIG_SCHED_CASS */
 
 /*
  * All the scheduling class methods:
