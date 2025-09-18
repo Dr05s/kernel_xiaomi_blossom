@@ -761,6 +761,17 @@ GED_ERROR ged_dvfs_um_commit(unsigned long gpu_tar_freq, bool bFallback)
 		100 * gL_ulWorkingPeriod_us) /
 		(gL_ulCalResetTS_us - g_ulPreDVFS_TS_us);
 		if (sentinalLoading > 100) {
+			ged_log_buf_print(ghLogBuf_DVFS,
+			"[GED_K] g_ulCalResetTS_us: %lu g_ulPreDVFS_TS_us: %lu",
+				gL_ulCalResetTS_us, g_ulPreDVFS_TS_us);
+			ged_log_buf_print(ghLogBuf_DVFS,
+			"[GED_K] gpu_loading: %u g_ulPreCalResetTS_us:%lu",
+				gpu_loading, gL_ulPreCalResetTS_us);
+			ged_log_buf_print(ghLogBuf_DVFS,
+			"[GED_K] g_ulWorkingPeriod_us: %lu",
+				gL_ulWorkingPeriod_us);
+			ged_log_buf_print(ghLogBuf_DVFS,
+				"[GED_K] gpu_av_loading: WTF");
 
 			if (gL_ulWorkingPeriod_us == 0)
 				sentinalLoading = gpu_loading;
@@ -769,6 +780,8 @@ GED_ERROR ged_dvfs_um_commit(unsigned long gpu_tar_freq, bool bFallback)
 		}
 		gpu_loading = sentinalLoading;
 	} else {
+		ged_log_buf_print(ghLogBuf_DVFS,
+			"[GED_K] gpu_av_loading: 5566/ %u", gpu_loading);
 		gpu_loading = 0;
 	}
 
@@ -1176,18 +1189,6 @@ static bool ged_dvfs_policy(
 				(gL_ulCalResetTS_us - g_ulPreDVFS_TS_us);
 
 			if (sentinalLoading > 100) {
-				ged_log_buf_print(ghLogBuf_DVFS,
-		"[GED_K1] g_ulCalResetTS_us: %lu g_ulPreDVFS_TS_us: %lu",
-					gL_ulCalResetTS_us, g_ulPreDVFS_TS_us);
-				ged_log_buf_print(ghLogBuf_DVFS,
-		"[GED_K1] gpu_loading: %u g_ulPreCalResetTS_us:%lu",
-					gpu_loading, gL_ulPreCalResetTS_us);
-				ged_log_buf_print(ghLogBuf_DVFS,
-		"[GED_K1] g_ulWorkingPeriod_us: %lu",
-					gL_ulWorkingPeriod_us);
-				ged_log_buf_print(ghLogBuf_DVFS,
-						"[GED_K1] gpu_av_loading: WTF");
-
 				if (gL_ulWorkingPeriod_us == 0)
 					sentinalLoading = gpu_loading;
 				else
@@ -1195,8 +1196,6 @@ static bool ged_dvfs_policy(
 			}
 			gpu_loading = sentinalLoading;
 		} else {
-			ged_log_buf_print(ghLogBuf_DVFS,
-			"[GED_K1] gpu_av_loading: 5566 / %u", gpu_loading);
 			gpu_loading = 0;
 		}
 
