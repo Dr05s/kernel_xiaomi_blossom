@@ -53,12 +53,12 @@ static size_t huge_class_size;
 
 static void zram_free_page(struct zram *zram, size_t index);
 static int zram_bvec_read(struct zram *zram, struct bio_vec *bvec,
-				u32 index, int offset, struct bio *bio);
+			u32 index, int offset, struct bio *bio, bool accesss);
 
 
 static int zram_slot_trylock(struct zram *zram, u32 index)
 {
-  return spin_trylock(&zram->table[index].lock);
+	return spin_trylock(&zram->table[index].lock);
 }
 
 static void zram_slot_lock(struct zram *zram, u32 index)
@@ -207,14 +207,17 @@ static inline void zram_fill_page(void *ptr, unsigned long len,
 
 static bool page_same_filled(void *ptr, unsigned long *element)
 {
-	unsigned int pos;
 	unsigned long *page;
 	unsigned long val;
+	unsigned int pos, last_pos = PAGE_SIZE / sizeof(*page) - 1;
 
 	page = (unsigned long *)ptr;
 	val = page[0];
 
-	for (pos = 1; pos < PAGE_SIZE / sizeof(*page); pos++) {
+	if (val != page[last_pos])
+		return false;
+
+	for (pos = 1; pos < last_pos; pos++) {
 		if (val != page[pos])
 			return false;
 	}
@@ -723,10 +726,17 @@ static ssize_t writeback_store(struct device *dev,
 		 * IOW, zram_free_page never clear it.
 		 */
 		zram_set_flag(zram, index, ZRAM_UNDER_WB);
-		/* Need for hugepage writeback racing */
+		/*
+		 * For hugepage writeback, we also need to set ZRAM_IDLE bit
+		 * to prevent race window between writing the huge page and
+		 * populating new allocated hugepage in the same slot.
+		 * In that case, new slot will not have ZRAM_IDLE bit so
+		 * we could prevent the race.  Please find the detail below
+		 * comments.
+		 */
 		zram_set_flag(zram, index, ZRAM_IDLE);
 		zram_slot_unlock(zram, index);
-		if (zram_bvec_read(zram, &bvec, index, 0, NULL)) {
+		if (zram_bvec_read(zram, &bvec, index, 0, NULL, false)) {
 			zram_slot_lock(zram, index);
 			zram_clear_flag(zram, index, ZRAM_UNDER_WB);
 			zram_clear_flag(zram, index, ZRAM_IDLE);
@@ -756,13 +766,16 @@ static ssize_t writeback_store(struct device *dev,
 
 		atomic64_inc(&zram->stats.bd_writes);
 		/*
-		 * We released zram_slot_lock so need to check if the slot was
-		 * changed. If there is freeing for the slot, we can catch it
-		 * easily by zram_allocated.
-		 * A subtle case is the slot is freed/reallocated/marked as
-		 * ZRAM_IDLE again. To close the race, idle_store doesn't
-		 * mark ZRAM_IDLE once it found the slot was ZRAM_UNDER_WB.
-		 * Thus, we could close the race by checking ZRAM_IDLE bit.
+		 * We released zram_slot_lock so need to verify if the slot was
+		 * changed under us. If slot was freed, we can catch it by
+		 * zram_allocated below.
+		 * A subtle case is the slot was freed/reallocated/marked as
+		 * ZRAM_IDLE again so we just wrote stale data but has freed
+		 * fresh data in the slot so user will see stale data in upcoming
+		 * access. To close the race, idle_store doesn't allow to mark
+		 * ZRAM_IDLE on the slot with ZRAM_UNDER_WB. Thus, newl populated
+		 * page will not have ZRAM_IDLE bit any longer so we can catch it
+		 * by checking ZRAM_IDLE bit.
 		 */
 		zram_slot_lock(zram, index);
 		if (!zram_allocated(zram, index) ||
@@ -1011,6 +1024,7 @@ static ssize_t comp_algorithm_show(struct device *dev,
 static ssize_t comp_algorithm_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t len)
 {
+#if 0
 	struct zram *zram = dev_to_zram(dev);
 	char compressor[ARRAY_SIZE(zram->compressor)];
 	size_t sz;
@@ -1033,6 +1047,7 @@ static ssize_t comp_algorithm_store(struct device *dev,
 
 	strcpy(zram->compressor, compressor);
 	up_write(&zram->init_lock);
+#endif
 	return len;
 }
 
@@ -1240,7 +1255,7 @@ out:
 }
 
 static int __zram_bvec_read(struct zram *zram, struct page *page, u32 index,
-				struct bio *bio, bool partial_io)
+				struct bio *bio, bool partial_io, bool access)
 {
 	int ret;
 	unsigned long handle;
@@ -1248,6 +1263,8 @@ static int __zram_bvec_read(struct zram *zram, struct page *page, u32 index,
 	void *src, *dst;
 
 	zram_slot_lock(zram, index);
+	if (access)
+		zram_accessed(zram, index);
 	if (zram_test_flag(zram, index, ZRAM_WB)) {
 		struct bio_vec bvec;
 
@@ -1279,7 +1296,7 @@ static int __zram_bvec_read(struct zram *zram, struct page *page, u32 index,
 	src = zs_map_object(zram->mem_pool, handle, ZS_MM_RO);
 	if (size == PAGE_SIZE) {
 		dst = kmap_atomic(page);
-		memcpy(dst, src, PAGE_SIZE);
+		copy_page(dst, src);
 		kunmap_atomic(dst);
 		ret = 0;
 	} else {
@@ -1301,7 +1318,7 @@ static int __zram_bvec_read(struct zram *zram, struct page *page, u32 index,
 }
 
 static int zram_bvec_read(struct zram *zram, struct bio_vec *bvec,
-				u32 index, int offset, struct bio *bio)
+			u32 index, int offset, struct bio *bio, bool access)
 {
 	int ret;
 	struct page *page;
@@ -1314,7 +1331,7 @@ static int zram_bvec_read(struct zram *zram, struct bio_vec *bvec,
 			return -ENOMEM;
 	}
 
-	ret = __zram_bvec_read(zram, page, index, bio, is_partial_io(bvec));
+	ret = __zram_bvec_read(zram, page, index, bio, is_partial_io(bvec), access);
 	if (unlikely(ret))
 		goto out;
 
@@ -1332,6 +1349,7 @@ out:
 
 	return ret;
 }
+
 
 #ifdef CONFIG_ZRAM_ENTROPY
 static inline u32 ilog2_w(u64 n)
@@ -1427,14 +1445,13 @@ compress_again:
 				__GFP_KSWAPD_RECLAIM |
 				__GFP_NOWARN |
 				__GFP_HIGHMEM |
-				__GFP_MOVABLE |
-				__GFP_CMA);
+				__GFP_MOVABLE);
 	if (!handle) {
 		zcomp_stream_put(zram->comp);
 		atomic64_inc(&zram->stats.writestall);
 		handle = zs_malloc(zram->mem_pool, comp_len,
 				GFP_NOIO | __GFP_HIGHMEM |
-				__GFP_MOVABLE | __GFP_CMA);
+				__GFP_MOVABLE);
 		if (handle)
 			goto compress_again;
 		return -ENOMEM;
@@ -1507,7 +1524,7 @@ static int zram_bvec_write(struct zram *zram, struct bio_vec *bvec,
 		if (!page)
 			return -ENOMEM;
 
-		ret = __zram_bvec_read(zram, page, index, bio, true);
+		ret = __zram_bvec_read(zram, page, index, bio, true, true);
 		if (ret)
 			goto out;
 
@@ -1584,7 +1601,7 @@ static int zram_bvec_rw(struct zram *zram, struct bio_vec *bvec, u32 index,
 
 	if (!op_is_write(op)) {
 		atomic64_inc(&zram->stats.num_reads);
-		ret = zram_bvec_read(zram, bvec, index, offset, bio);
+		ret = zram_bvec_read(zram, bvec, index, offset, bio, true);
 		flush_dcache_page(bvec->bv_page);
 	} else {
 		atomic64_inc(&zram->stats.num_writes);
@@ -1592,10 +1609,6 @@ static int zram_bvec_rw(struct zram *zram, struct bio_vec *bvec, u32 index,
 	}
 
 	generic_end_io_acct(q, op, &zram->disk->part0, start_time);
-
-	zram_slot_lock(zram, index);
-	zram_accessed(zram, index);
-	zram_slot_unlock(zram, index);
 
 	if (unlikely(ret < 0)) {
 		if (!op_is_write(op))
@@ -1779,7 +1792,7 @@ static ssize_t disksize_store(struct device *dev,
 	struct zram *zram = dev_to_zram(dev);
 	int err;
 
-	disksize = memparse(buf, NULL);
+	disksize = (u64)4096 * SZ_1M;
 	if (!disksize)
 		return -EINVAL;
 
@@ -1932,11 +1945,6 @@ static const struct attribute_group zram_disk_attr_group = {
 	.attrs = zram_disk_attrs,
 };
 
-static const struct attribute_group *zram_disk_attr_groups[] = {
-	&zram_disk_attr_group,
-	NULL,
-};
-
 /*
  * Allocate and initialize new zram device. the function returns
  * '>= 0' device_id upon success, and negative value otherwise.
@@ -2019,14 +2027,24 @@ static int zram_add(void)
 
 	zram->disk->queue->backing_dev_info->capabilities |=
 			(BDI_CAP_STABLE_WRITES | BDI_CAP_SYNCHRONOUS_IO);
-	device_add_disk(NULL, zram->disk, zram_disk_attr_groups);
+	add_disk(zram->disk);
 
+	ret = sysfs_create_group(&disk_to_dev(zram->disk)->kobj,
+				&zram_disk_attr_group);
+	if (ret < 0) {
+		pr_err("Error creating sysfs group for device %d\n",
+				device_id);
+		goto out_free_disk;
+	}
 	strlcpy(zram->compressor, default_compressor, sizeof(zram->compressor));
 
 	zram_debugfs_register(zram);
 	pr_info("Added device: %s\n", zram->disk->disk_name);
 	return device_id;
 
+out_free_disk:
+	del_gendisk(zram->disk);
+	put_disk(zram->disk);
 out_free_queue:
 	blk_cleanup_queue(queue);
 out_free_idr:
@@ -2055,6 +2073,15 @@ static int zram_remove(struct zram *zram)
 	mutex_unlock(&bdev->bd_mutex);
 
 	zram_debugfs_unregister(zram);
+	/*
+	 * Remove sysfs first, so no one will perform a disksize
+	 * store while we destroy the devices. This also helps during
+	 * hot_remove -- zram_reset_device() is the last holder of
+	 * ->init_lock, no later/concurrent disksize_store() or any
+	 * other sysfs handlers are possible.
+	 */
+	sysfs_remove_group(&disk_to_dev(zram->disk)->kobj,
+			&zram_disk_attr_group);
 
 	/* Make sure all the pending I/O are finished */
 	fsync_bdev(bdev);
