@@ -1925,6 +1925,27 @@ static int zcv_get(struct mtk_gauge *gauge_dev,
 	return 0;
 }
 
+static int get_charger_zcv(struct mtk_gauge *gauge_dev)
+{
+	struct power_supply *chg_psy;
+	union power_supply_propval val;
+	int ret = 0;
+
+	chg_psy = power_supply_get_by_name("mtk-master-charger");
+
+	if (chg_psy == NULL) {
+		bm_err("[%s] can get charger psy\n", __func__);
+		return -ENODEV;
+	}
+
+	ret = power_supply_get_property(chg_psy,
+		POWER_SUPPLY_PROP_VOLTAGE_BOOT, &val);
+
+	bm_err("[%s]_hw_ocv_chgin=%d, ret=%d\n", __func__, val.intval, ret);
+
+	return val.intval;
+}
+
 static int boot_zcv_get(struct mtk_gauge *gauge_dev,
 	struct mtk_gauge_sysfs_field_info *attr, int *val)
 {
@@ -1936,10 +1957,11 @@ static int boot_zcv_get(struct mtk_gauge *gauge_dev,
 	int _hw_ocv_57_pon;
 	int _hw_ocv_57_plugin;
 	int _hw_ocv_57_pon_rdy;
-	int _hw_ocv_chgin = 0;
-	int _hw_ocv_chgin_rdy = 0;
+	int _hw_ocv_chgin;
+	int _hw_ocv_chgin_rdy;
 	int now_temp;
 	int now_thr;
+	int tmp_hwocv_chgin = 0;
 	bool fg_is_charger_exist;
 	struct mtk_battery *gm;
 	struct zcv_data *zcvinfo;
@@ -1952,6 +1974,12 @@ static int boot_zcv_get(struct mtk_gauge *gauge_dev,
 	_hw_ocv_57_pon = read_hw_ocv_6357_power_on(gauge_dev);
 	_hw_ocv_57_plugin = read_hw_ocv_6357_plug_in(gauge_dev);
 
+	tmp_hwocv_chgin = get_charger_zcv(gauge_dev);
+	if (tmp_hwocv_chgin != -ENODEV)
+		_hw_ocv_chgin = tmp_hwocv_chgin / 100;
+	else
+		_hw_ocv_chgin = 0;
+
 	now_temp = gm->bs_data.bat_batt_temp;
 
 	if (gm == NULL)
@@ -1962,6 +1990,11 @@ static int boot_zcv_get(struct mtk_gauge *gauge_dev,
 		else
 			now_thr = gm->ext_hwocv_swocv_lt;
 	}
+
+	if (_hw_ocv_chgin < 25000)
+		_hw_ocv_chgin_rdy = 0;
+	else
+		_hw_ocv_chgin_rdy = 1;
 
 	/* if preloader records charge in, need to using subpmic as hwocv */
 	fgauge_get_info(
@@ -3262,4 +3295,3 @@ module_exit(mt6357_gauge_exit);
 MODULE_AUTHOR("wy.chuang <wy.chuang@mediatek.com>");
 MODULE_DESCRIPTION("MTK Gauge Device Driver");
 MODULE_LICENSE("GPL");
-
