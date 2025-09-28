@@ -484,7 +484,7 @@ static int get_charger_type(struct mtk_charger_type *info)
 
 	hw_bc11_init(info);
 	if (hw_bc11_DCD(info)) {
-		info->psy_desc.type = POWER_SUPPLY_TYPE_USB;
+		info->psy_desc.type = POWER_SUPPLY_TYPE_USB_DCP;
 		type = POWER_SUPPLY_USB_TYPE_DCP;
 	} else {
 		if (hw_bc11_stepA2(info)) {
