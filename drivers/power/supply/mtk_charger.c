@@ -1870,7 +1870,7 @@ static int psy_charger_get_property(struct power_supply *psy,
 		val->intval = get_charger_input_current(info, chg);
 		break;
 	case POWER_SUPPLY_PROP_USB_TYPE:
-		val->intval = info->usb_type;
+		val->intval = info->chr_type;
 		break;
 	case POWER_SUPPLY_PROP_VOLTAGE_BOOT:
 		val->intval = get_charger_zcv(info, chg);
