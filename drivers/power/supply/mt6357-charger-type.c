@@ -344,6 +344,8 @@ static unsigned int hw_bc11_stepA2(struct mtk_charger_type *info)
 		PMIC_RG_BC11_CMP_EN_MASK,
 		PMIC_RG_BC11_CMP_EN_SHIFT,
 		0x0);
+	
+	pr_notice("hw_bc11_stepA2 result: %u\n", wChargerAvail);
 	return wChargerAvail;
 }
 
@@ -404,6 +406,7 @@ static unsigned int hw_bc11_stepB2(struct mtk_charger_type *info)
 			0x2);
 		pr_info("charger type: DCP, keep DM voltage source in stepB2\n");
 	}
+	pr_notice("hw_bc11_stepB2 result: %u\n", wChargerAvail);
 	return wChargerAvail;
 
 }
@@ -507,7 +510,7 @@ static int get_charger_type(struct mtk_charger_type *info)
 		pr_info("charger type: skip bc11 release for BC12 DCP SPEC\n");
 
 	dump_charger_name(info->psy_desc.type);
-
+  pr_notice("charger type decided: type=%d usb_type=%d\n", info->psy_desc.type, type);
 	return type;
 }
 
