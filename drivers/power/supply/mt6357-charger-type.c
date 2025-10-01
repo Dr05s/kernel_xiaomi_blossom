@@ -113,6 +113,7 @@ static enum power_supply_property mt_ac_properties[] = {
 
 static enum power_supply_property mt_usb_properties[] = {
 	POWER_SUPPLY_PROP_ONLINE,
+	POWER_SUPPLY_PROP_TYPE,
 	POWER_SUPPLY_PROP_CURRENT_MAX,
 	POWER_SUPPLY_PROP_VOLTAGE_MAX,
 };
@@ -646,7 +647,7 @@ static int psy_chr_type_get_property(struct power_supply *psy,
 			val->intval = 1;
 		break;
 	case POWER_SUPPLY_PROP_TYPE:
-		 val->intval = info->psy_desc.type;
+		val->intval = info->psy_desc.type;
 		break;
 	case POWER_SUPPLY_PROP_USB_TYPE:
 		val->intval = info->type;
@@ -721,11 +722,11 @@ static int mt_usb_get_property(struct power_supply *psy,
 		else
 			val->intval = 0;
 		break;
-	case POWER_SUPPLY_PROP_USB_TYPE:
-    val->intval = info->type;
+	case POWER_SUPPLY_PROP_TYPE:
+		val->intval = info->psy_desc.type;
     break;
 	case POWER_SUPPLY_PROP_CURRENT_MAX:
-		val->intval = 500000;
+		val->intval = 1500000;
 		break;
 	case POWER_SUPPLY_PROP_VOLTAGE_MAX:
 		val->intval = 5000000;
