@@ -344,8 +344,7 @@ static unsigned int hw_bc11_stepA2(struct mtk_charger_type *info)
 		PMIC_RG_BC11_CMP_EN_MASK,
 		PMIC_RG_BC11_CMP_EN_SHIFT,
 		0x0);
-	
-	pr_notice("hw_bc11_stepA2 result: %u\n", wChargerAvail);
+
 	return wChargerAvail;
 }
 
@@ -406,9 +405,8 @@ static unsigned int hw_bc11_stepB2(struct mtk_charger_type *info)
 			0x2);
 		pr_info("charger type: DCP, keep DM voltage source in stepB2\n");
 	}
-	pr_notice("hw_bc11_stepB2 result: %u\n", wChargerAvail);
-	return wChargerAvail;
 
+	return wChargerAvail;
 }
 
 static void hw_bc11_done(struct mtk_charger_type *info)
@@ -487,8 +485,8 @@ static int get_charger_type(struct mtk_charger_type *info)
 
 	hw_bc11_init(info);
 	if (hw_bc11_DCD(info)) {
-		info->psy_desc.type = POWER_SUPPLY_TYPE_USB_DCP;
-		type = POWER_SUPPLY_USB_TYPE_DCP;
+    info->psy_desc.type = POWER_SUPPLY_TYPE_USB;
+    type = POWER_SUPPLY_USB_TYPE_DCP;
 	} else {
 		if (hw_bc11_stepA2(info)) {
 			if (hw_bc11_stepB2(info)) {
@@ -717,12 +715,15 @@ static int mt_usb_get_property(struct power_supply *psy,
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_ONLINE:
-		if ((info->type == POWER_SUPPLY_USB_TYPE_SDP) ||
+		if ((info->type == POWER_SUPPLY_USB_TYPE_DCP) ||
 			(info->type == POWER_SUPPLY_USB_TYPE_CDP))
 			val->intval = 1;
 		else
 			val->intval = 0;
 		break;
+	case POWER_SUPPLY_PROP_USB_TYPE:
+    val->intval = info->type;
+    break;
 	case POWER_SUPPLY_PROP_CURRENT_MAX:
 		val->intval = 500000;
 		break;
