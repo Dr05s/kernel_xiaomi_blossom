@@ -845,7 +845,7 @@ static int mt6357_charger_type_probe(struct platform_device *pdev)
 	info->ac_cfg.drv_data = info;
 
 	info->usb_desc.name = "usb";
-	info->usb_desc.type = info->psy_desc.type;
+	info->usb_desc.type = POWER_SUPPLY_TYPE_USB_DCP;
 	info->usb_desc.properties = mt_usb_properties;
 	info->usb_desc.num_properties = ARRAY_SIZE(mt_usb_properties);
 	info->usb_desc.get_property = mt_usb_get_property;
