@@ -585,7 +585,7 @@
 	charger1@1A {
         compatible = "sgm,sgm41513_charger";
         reg = <0x1A>;
-        sgm,sgm41513,usb-vlim = <4600>;
+        sgm,sgm41513,usb-vlim = <4780>;
         sgm,sgm41513,usb-ilim = <2000>;
         sgm,sgm41513,usb-vreg = <0x1130>;
         sgm,sgm41513,usb-ichg = <500>;
@@ -601,9 +601,9 @@
 	charger@6B {
         compatible = "ti,bq2560x_charger","eta,eta6963_charger","cx,cx7601_charger";
         reg = <0x6B>;
-        ti,bq2560x,usb-vlim = <4600>;
+        ti,bq2560x,usb-vlim = <4780>;
         ti,bq2560x,usb-ilim = <2000>;
-        ti,bq2560x,usb-vreg = <4400>;
+        ti,bq2560x,usb-vreg = <4380>;
         ti,bq2560x,usb-ichg = <500>;
         ti,bq2560x,precharge-current = <256>;
         ti,bq2560x,termination-current = <100>;
@@ -613,9 +613,9 @@
         ti,bq2560x,stat-pin-ctrl = <3>;
         ti,bq2560x,vac-ovp-threshold = <6500>;
 
-        cx,cx7601,usb-vlim = <4600>;
+        cx,cx7601,usb-vlim = <4780>;
         cx,cx7601,usb-ilim = <2000>;
-        cx,cx7601,usb-vreg = <4400>;
+        cx,cx7601,usb-vreg = <4380>;
         cx,cx7601,usb-ichg = <500>;
         cx,cx7601,precharge-current = <256>;
         cx,cx7601,termination-current = <100>;
@@ -625,9 +625,9 @@
         cx,cx7601,stat-pin-ctrl = <3>;
         cx,cx7601,vac-ovp-threshold = <6500>;
 
-        eta,eta6963,usb-vlim = <4600>;
+        eta,eta6963,usb-vlim = <4780>;
         eta,eta6963,usb-ilim = <2000>;
-        eta,eta6963,usb-vreg = <4400>;
+        eta,eta6963,usb-vreg = <4380>;
         eta,eta6963,usb-ichg = <500>;
         eta,eta6963,precharge-current = <256>;
         eta,eta6963,termination-current = <100>;
