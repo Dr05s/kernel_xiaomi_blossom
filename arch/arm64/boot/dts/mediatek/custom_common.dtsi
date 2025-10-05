@@ -588,7 +588,7 @@
         sgm,sgm41513,usb-vlim = <4780>;
         sgm,sgm41513,usb-ilim = <2000>;
         sgm,sgm41513,usb-vreg = <0x1130>;
-        sgm,sgm41513,usb-ichg = <500>;
+        sgm,sgm41513,usb-ichg = <1500>;
         sgm,sgm41513,precharge-current = <256>;
         sgm,sgm41513,termination-current = <100>;
         sgm,sgm41513,boost-voltage = <5150>;
@@ -604,7 +604,7 @@
         ti,bq2560x,usb-vlim = <4780>;
         ti,bq2560x,usb-ilim = <2000>;
         ti,bq2560x,usb-vreg = <4380>;
-        ti,bq2560x,usb-ichg = <500>;
+        ti,bq2560x,usb-ichg = <1500>;
         ti,bq2560x,precharge-current = <256>;
         ti,bq2560x,termination-current = <100>;
         ti,bq2560x,boost-voltage = <5150>;
@@ -616,7 +616,7 @@
         cx,cx7601,usb-vlim = <4780>;
         cx,cx7601,usb-ilim = <2000>;
         cx,cx7601,usb-vreg = <4380>;
-        cx,cx7601,usb-ichg = <500>;
+        cx,cx7601,usb-ichg = <1500>;
         cx,cx7601,precharge-current = <256>;
         cx,cx7601,termination-current = <100>;
         cx,cx7601,boost-voltage = <5150>;
@@ -628,7 +628,7 @@
         eta,eta6963,usb-vlim = <4780>;
         eta,eta6963,usb-ilim = <2000>;
         eta,eta6963,usb-vreg = <4380>;
-        eta,eta6963,usb-ichg = <500>;
+        eta,eta6963,usb-ichg = <1500>;
         eta,eta6963,precharge-current = <256>;
         eta,eta6963,termination-current = <100>;
         eta,eta6963,boost-voltage = <5150>;
