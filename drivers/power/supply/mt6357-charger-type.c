@@ -509,7 +509,6 @@ static int get_charger_type(struct mtk_charger_type *info)
 		pr_info("charger type: skip bc11 release for BC12 DCP SPEC\n");
 
 	dump_charger_name(info->psy_desc.type);
-  pr_notice("charger type decided: type=%d usb_type=%d\n", info->psy_desc.type, type);
 	return type;
 }
 
@@ -726,7 +725,7 @@ static int mt_usb_get_property(struct power_supply *psy,
 		val->intval = info->psy_desc.type;
     break;
 	case POWER_SUPPLY_PROP_CURRENT_MAX:
-    if (info->type == POWER_SUPPLY_USB_TYPE_SDP)
+    if ((info->type == POWER_SUPPLY_USB_TYPE_SDP) || (info->type == POWER_SUPPLY_USB_TYPE_UNKNOWN))
       val->intval = 500000;
     else
       val->intval = 1500000;
@@ -848,6 +847,8 @@ static int mt6357_charger_type_probe(struct platform_device *pdev)
 	info->usb_desc.type = POWER_SUPPLY_TYPE_USB_DCP;
 	info->usb_desc.properties = mt_usb_properties;
 	info->usb_desc.num_properties = ARRAY_SIZE(mt_usb_properties);
+	info->usb_desc.property_is_writeable =
+			psy_charger_type_property_is_writeable;
 	info->usb_desc.get_property = mt_usb_get_property;
 	info->usb_cfg.drv_data = info;
 
