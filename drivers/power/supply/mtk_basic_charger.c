@@ -84,6 +84,7 @@ static void select_cv(struct mtk_charger *info)
 
 static bool is_typec_adapter(struct mtk_charger *info)
 {
+#if 0
 	int rp;
 
 	rp = adapter_dev_get_property(info->pd_adapter, TYPEC_RP_LEVEL);
@@ -92,7 +93,7 @@ static bool is_typec_adapter(struct mtk_charger *info)
 			info->chr_type != POWER_SUPPLY_TYPE_USB &&
 			info->chr_type != POWER_SUPPLY_TYPE_USB_CDP)
 		return true;
-
+#endif
 	return false;
 }
 
@@ -155,6 +156,7 @@ static bool select_charging_current_limit(struct mtk_charger *info,
 		goto done;
 	}
 
+#ifdef MTK_BASE
 	if (info->atm_enabled == true
 		&& (info->chr_type == POWER_SUPPLY_TYPE_USB ||
 		info->chr_type == POWER_SUPPLY_TYPE_USB_CDP)
@@ -166,6 +168,7 @@ static bool select_charging_current_limit(struct mtk_charger *info,
 		is_basic = true;
 		goto done;
 	}
+#endif
 
 	if (info->chr_type == POWER_SUPPLY_TYPE_USB) {
 		pdata->input_current_limit =
@@ -305,7 +308,6 @@ done:
 		chr_err("min_charging_current is too low %d %d\n",
 			pdata->charging_current_limit, ichg1_min);
 		is_basic = true;
-		info->enable_hv_charging = false;
 	}
 
 	ret = charger_dev_get_min_input_current(info->chg1_dev, &aicr1_min);
@@ -314,7 +316,6 @@ done:
 		chr_err("min_input_current is too low %d %d\n",
 			pdata->input_current_limit, aicr1_min);
 		is_basic = true;
-		info->enable_hv_charging = false;
 	}
 
 	chr_err("m:%d chg1:%d,%d,%d,%d chg2:%d,%d,%d,%d type:%d:%d usb_unlimited:%d usbif:%d usbsm:%d aicl:%d atm:%d bm:%d b:%d\n",
@@ -445,13 +446,13 @@ static int do_algorithm(struct mtk_charger *info)
 			pdata->charging_current_limit);
 		charger_dev_set_constant_voltage(info->chg1_dev,
 			info->setting.cv);
-
-		if (pdata->input_current_limit == 0 ||
-		    pdata->charging_current_limit == 0)
-			charger_dev_enable(info->chg1_dev, false);
-		else
-			charger_dev_enable(info->chg1_dev, true);
 	}
+
+	if (pdata->input_current_limit == 0 ||
+	    pdata->charging_current_limit == 0)
+		charger_dev_enable(info->chg1_dev, false);
+	else
+		charger_dev_enable(info->chg1_dev, true);
 
 	if (info->chg1_dev != NULL)
 		charger_dev_dump_registers(info->chg1_dev);
@@ -467,7 +468,6 @@ static int enable_charging(struct mtk_charger *info,
 {
 	int i;
 	struct chg_alg_device *alg;
-
 
 	chr_err("%s %d\n", __func__, en);
 
@@ -504,11 +504,10 @@ static int charger_dev_event(struct notifier_block *nb, unsigned long event,
 	case CHARGER_DEV_NOTIFY_EOC:
 		notify.evt = EVT_FULL;
 		notify.value = 0;
-	for (i = 0; i < 10; i++) {
-		alg = info->alg[i];
-		chg_alg_notifier_call(alg, &notify);
-	}
-
+    for (i = 0; i < 10; i++) {
+      alg = info->alg[i];
+      chg_alg_notifier_call(alg, &notify);
+    }
 		break;
 	case CHARGER_DEV_NOTIFY_RECHG:
 		pr_info("%s: recharge\n", __func__);
@@ -531,11 +530,8 @@ static int charger_dev_event(struct notifier_block *nb, unsigned long event,
 	return NOTIFY_DONE;
 }
 
-
-
 int mtk_basic_charger_init(struct mtk_charger *info)
 {
-
 	info->algo.do_algorithm = do_algorithm;
 	info->algo.enable_charging = enable_charging;
 	info->algo.do_event = charger_dev_event;
