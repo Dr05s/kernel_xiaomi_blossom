@@ -80,6 +80,7 @@ static inline void cfs_se_util_change(struct sched_avg *avg)
  * clock pelt      | 1| 2|    3|    4| 7| 8| 9|   10|   11|14|15|16
  *
  */
+#include <linux/sched/topology.h>
 static inline void update_rq_clock_pelt(struct rq *rq, s64 delta)
 {
 	if (unlikely(is_idle_task(rq->curr))) {
@@ -104,7 +105,7 @@ static inline void update_rq_clock_pelt(struct rq *rq, s64 delta)
 	 * Scale the elapsed time to reflect the real amount of
 	 * computation
 	 */
-	delta = cap_scale(delta, arch_scale_cpu_capacity(cpu_of(rq)));
+	delta = cap_scale(delta, arch_scale_cpu_capacity(NULL, cpu_of(rq)));
 	delta = cap_scale(delta, arch_scale_freq_capacity(cpu_of(rq)));
 
 	rq->clock_pelt += delta;
